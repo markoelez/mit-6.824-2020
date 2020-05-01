@@ -9,13 +9,10 @@ package main
 // Please do not change this file.
 //
 
-import (
-	"fmt"
-	"os"
-	"time"
-
-	"../mr"
-)
+import "../mr"
+import "time"
+import "os"
+import "fmt"
 
 func main() {
 	if len(os.Args) < 2 {

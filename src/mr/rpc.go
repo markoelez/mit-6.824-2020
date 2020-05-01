@@ -1,18 +1,41 @@
 package mr
 
-type TaskAssignmentArgs struct{}
-type TaskOutputArgs struct{}
+import (
+	"fmt"
+	"log"
+	"net/rpc"
+	"os"
+	"strconv"
+)
 
-// get task from master server
-type TaskAssignment struct {
-	ID       int
-	Data     []string
-	Type     TaskType
-	Finished bool
+type ExampleArgs struct {
+	X int
 }
 
-type TaskOutput struct {
-	ID   int
-	Data []string
-	Type TaskType
+type ExampleReply struct {
+	Y int
+}
+
+func masterSock() string {
+	s := "/var/tmp/824-mr-"
+	s += strconv.Itoa(os.Getuid())
+	return s
+}
+
+func Call(rpcname string, args interface{}, reply interface{}) bool {
+	// c, err := rpc.DialHTTP("tcp", "127.0.0.1"+":1234")
+	sockname := masterSock()
+	c, err := rpc.DialHTTP("unix", sockname)
+	if err != nil {
+		log.Fatal("dialing", err)
+	}
+	defer c.Close()
+
+	err = c.Call(rpcname, args, reply)
+	if err == nil {
+		return true
+	}
+
+	fmt.Println(err)
+	return false
 }
