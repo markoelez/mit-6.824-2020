@@ -17,11 +17,10 @@ type Manager struct {
 func NewManager(numReduce int, inputFiles []string, taskType TaskType) (m *Manager) {
 	// split input files into individual tasks
 	tasks := make([]*Task, 0)
-	if taskType == TaskTypeMap {
-		for i, file := range inputFiles {
-			t := MakeTask(file, i, numReduce, taskType)
-			tasks = append(tasks, t)
-		}
+
+	for i, file := range inputFiles {
+		t := MakeTask(file, i, numReduce, taskType)
+		tasks = append(tasks, t)
 	}
 
 	// create manager
@@ -42,6 +41,10 @@ func MakeTask(file string, taskID int, numOutputs int, taskType TaskType) *Task 
 		TaskState:  TaskStateIdle,
 		Input:      file,
 	}
+}
+
+func (m *Manager) CompleteTask(t *Task) {
+	m.Tasks[t.TaskID].TaskState = TaskStateCompleted
 }
 
 func (m *Manager) GetTask() *Task {
