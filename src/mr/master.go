@@ -14,16 +14,18 @@ type Master struct {
 
 func (m *Master) GiveTask(_ *struct{}, reply *Task) error {
 	t := m.MapManager.GetTask()
+
 	if t == nil {
 		log.Fatal("DONE WITH PHASE 1")
 	}
-	reply = t
 
-	return nil
-}
+	reply.Input = t.Input
+	reply.TaskID = t.TaskID
+	reply.NumOutputs = t.NumOutputs
+	reply.Completed = t.Completed
+	reply.TaskState = t.TaskState
+	reply.TaskType = t.TaskType
 
-func (m *Master) Example(args *ExampleArgs, reply *ExampleReply) error {
-	reply.Y = args.X + 1
 	return nil
 }
 

@@ -1,7 +1,6 @@
 package mr
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -52,7 +51,6 @@ func (m *Manager) GetTask() *Task {
 
 	for {
 		idleTasks := m.GetIdleTasks()
-		fmt.Printf("IDLE: %v\n", idleTasks)
 		if len(idleTasks) == 0 {
 			//m.Cond.Wait()
 			return nil
@@ -60,7 +58,6 @@ func (m *Manager) GetTask() *Task {
 
 		// just take first task
 		t := idleTasks[0]
-		fmt.Println(t)
 		// mark as in progress
 		t.TaskState = TaskStateInProgress
 

@@ -1,8 +1,12 @@
 package mr
 
 import (
+	"encoding/json"
 	"fmt"
 	"hash/fnv"
+	"io/ioutil"
+	"log"
+	"os"
 	"time"
 )
 
@@ -17,7 +21,32 @@ func Worker(mapf func(string, string) []KeyValue, reducef func(string, []string)
 
 		t := getTask()
 
-		fmt.Printf("TASK: %v\n", t)
+		// process task
+		if t.TaskType == TaskTypeMap {
+			file, err := os.Open(t.Input)
+			if err != nil {
+				log.Fatalf("cannot open %v\n", t.Input)
+			}
+			content, err := ioutil.ReadAll(file)
+			if err != nil {
+				log.Fatalf("cannot open %v\n", t.Input)
+			}
+			file.Close()
+			kva := mapf(t.Input, string(content))
+
+			oname := fmt.Sprintf("mr-out-%d", t.TaskID)
+			fmt.Printf("encoding output file %s for task file %s\n", oname, t.Input)
+			ofile, _ := os.Create(oname)
+
+			enc := json.NewEncoder(ofile)
+			for _, kv := range kva {
+				err := enc.Encode(&kv)
+				if err != nil {
+					log.Fatal("Error encoding output file")
+				}
+			}
+
+		}
 
 		time.Sleep(time.Second * 2)
 	}
@@ -27,18 +56,4 @@ func getTask() *Task {
 	t := Task{}
 	Call("Master.GiveTask", &struct{}{}, &t)
 	return &t
-}
-
-func CallExample() {
-
-	args := ExampleArgs{
-		X: 99,
-	}
-
-	reply := ExampleReply{}
-
-	Call("Master.Example", &args, &reply)
-
-	// reply.Y should be 100.
-	fmt.Printf("reply.Y %v\n", reply.Y)
 }
