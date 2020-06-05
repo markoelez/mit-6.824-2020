@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"sort"
-	"time"
 )
 
 func ihash(key string) int {
@@ -26,12 +25,15 @@ func (a ByKey) Less(i, j int) bool { return a[i].Key < a[j].Key }
 func Worker(mapf func(string, string) []KeyValue, reducef func(string, []string) string) {
 	intermediate := []KeyValue{}
 
+	oname := fmt.Sprintf("mr-out-%d", 0)
+	ofile, _ := os.Create(oname)
+	w := bufio.NewWriter(ofile)
+
 	for {
 
 		t := getTask()
 		fmt.Printf("CURRENT TASK: %v\n", t)
 
-		// process task
 		if t.TaskType == TaskTypeMap {
 			file, err := os.Open(t.Input)
 			if err != nil {
@@ -48,10 +50,6 @@ func Worker(mapf func(string, string) []KeyValue, reducef func(string, []string)
 			submitTask(t)
 		} else if t.TaskType == TaskTypeReduce {
 			sort.Sort(ByKey(intermediate))
-
-			oname := fmt.Sprintf("mr-out-%d", t.TaskID)
-			ofile, _ := os.Create(oname)
-			w := bufio.NewWriter(ofile)
 
 			i := 0
 			for i < len(intermediate) {
@@ -73,13 +71,12 @@ func Worker(mapf func(string, string) []KeyValue, reducef func(string, []string)
 			ofile.Close()
 			submitTask(t)
 		}
-
-		time.Sleep(time.Second * 1)
 	}
+	fmt.Println(intermediate)
 }
 
 func submitTask(t *Task) {
-	Call("Master.SubmitTask", &t, &struct{}{})
+	Call("Master.SubmitTask", t, &struct{}{})
 }
 
 func getTask() *Task {

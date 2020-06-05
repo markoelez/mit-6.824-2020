@@ -47,6 +47,15 @@ func (m *Manager) CompleteTask(t *Task) {
 	m.Tasks[t.TaskID].TaskState = TaskStateCompleted
 }
 
+func (m *Manager) Done() bool {
+	for _, t := range m.Tasks {
+		if t.TaskState != TaskStateCompleted {
+			return false
+		}
+	}
+	return true
+}
+
 func (m *Manager) GetTask() *Task {
 	// search through idle tasks and pick one
 	m.Lock()

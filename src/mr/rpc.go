@@ -23,9 +23,11 @@ func masterSock() string {
 }
 
 func Call(rpcname string, args interface{}, reply interface{}) bool {
-	// c, err := rpc.DialHTTP("tcp", "127.0.0.1"+":1234")
-	sockname := masterSock()
-	c, err := rpc.DialHTTP("unix", sockname)
+	/*
+		sockname := masterSock()
+		c, err := rpc.DialHTTP("unix", sockname)
+	*/
+	c, err := rpc.DialHTTP("tcp", "127.0.0.1"+":1234")
 	if err != nil {
 		log.Fatal("dialing", err)
 	}

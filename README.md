@@ -1,5 +1,12 @@
-# MIT-6.824
+# MIT-6.824: Distributed Systems
 
-#### Labs for MIT 6.824: Distributed Systems
+#### Labs
 
-- [ ] MapReduce
+### MapReduce
+ [ ] RAFT 
+ [ ] RAFT 
+
+
+### RAFT 
+
+

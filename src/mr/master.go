@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	"net/rpc"
-	"os"
 )
 
 type Master struct {
@@ -40,27 +39,28 @@ func (m *Master) GiveTask(_ *struct{}, reply *Task) error {
 		return nil
 	}
 
-	fmt.Println("DONE")
-
 	return nil
 }
 
-func (m *Master) SubmitTask(args *Task, _ *struct{}) {
+func (m *Master) SubmitTask(args *Task, _ *struct{}) error {
 	if args.TaskType == TaskTypeMap {
 		m.MapManager.CompleteTask(args)
 	}
 	if args.TaskType == TaskTypeReduce {
 		m.ReduceManager.CompleteTask(args)
 	}
+	return nil
 }
 
 func (m *Master) server() {
 	rpc.Register(m)
 	rpc.HandleHTTP()
-	//l, e := net.Listen("tcp", ":1234")
-	sockname := masterSock()
-	os.Remove(sockname)
-	l, e := net.Listen("unix", sockname)
+	/*
+		sockname := masterSock()
+		os.Remove(sockname)
+		l, e := net.Listen("unix", sockname)
+	*/
+	l, e := net.Listen("tcp", ":1234")
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}
@@ -68,7 +68,7 @@ func (m *Master) server() {
 }
 
 func (m *Master) Done() bool {
-	return false
+	return m.MapManager.Done() && m.ReduceManager.Done()
 }
 
 func MakeMaster(files []string, nReduce int) *Master {
